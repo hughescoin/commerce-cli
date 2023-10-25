@@ -2,8 +2,10 @@ package cli
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/coinbase-samples/commerce-sdk-go"
+	"github.com/hughescoin/commerce-cli/sdk"
 
 	"github.com/spf13/cobra"
 )
@@ -17,18 +19,16 @@ var chargesCmd = &cobra.Command{
 	Long:  `Interact with the Coinbase Commerce charges endpoint to create and view charges.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if client == nil {
-			fmt.Println("Please initiatie the client first using `./commerce init`")
-			return
+		if sdk.Client == nil {
+			log.Fatalf("client not initialized")
 		}
 
 		if setPriceValue != "" && setChargeId != "" {
-			fmt.Println("Cannot have both a PriceValue and ChargeId")
-			return
+			log.Fatalf("cannot have both a PriceValue and ChargeId")
 		}
 
 		if setPriceValue == "" && setChargeId == "" {
-			fmt.Println("Please provide either --setprice or --get flag.")
+			log.Fatalf("Please provide either --setprice or --get flag.")
 		}
 
 		if setPriceValue != "" {
@@ -39,21 +39,21 @@ var chargesCmd = &cobra.Command{
 					Currency: "USD",
 				},
 			}
-			resp, err := client.CreateCharge(&chargeReq)
+			resp, err := sdk.Client.CreateCharge(&chargeReq)
 			if err != nil {
-				fmt.Printf("Error creating charge: %s ", err)
+				log.Fatalf("error creating charge: %s ", err)
 			}
-			fmt.Printf("Charge created successfully! \n %v", resp.Data)
+			fmt.Printf("charge created successfully: %v\n", resp.Data)
 
 		}
 
 		if setChargeId != "" {
-			charge, err := client.GetCharge(setChargeId)
+			charge, err := sdk.Client.GetCharge(setChargeId)
 			if err != nil {
-				fmt.Printf("Error obtaining charge: %s \n Error: %s", setChargeId, err)
+				log.Fatalf("Error obtaining charge: %s - error: %s\n", setChargeId, err)
 			}
 
-			fmt.Printf("Charge details: %+v \n", charge)
+			fmt.Printf("Charge details: %+v\n", charge)
 		}
 
 	},
@@ -63,5 +63,4 @@ func init() {
 	rootCmd.AddCommand(chargesCmd)
 	chargesCmd.Flags().StringVarP(&setPriceValue, "setPrice", "p", "", "Set the price for the charge")
 	chargesCmd.Flags().StringVarP(&setChargeId, "get", "g", "", "Retrieve a charge by its code")
-
 }
