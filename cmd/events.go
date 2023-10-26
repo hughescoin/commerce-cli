@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/hughescoin/commerce-cli/sdk"
 	"github.com/spf13/cobra"
@@ -16,16 +17,11 @@ var eventsCmd = &cobra.Command{
 	Long:  "Interact with the Coinbase Commerce events endpoint to view event details.",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if sdk.Client == nil {
-			fmt.Printf("Please initiate client using `init apiKey <ApiKeyEnvironmentVariable>`")
-			return
-		}
-
 		if setEventId != "" {
 
 			event, err := sdk.Client.ShowEvent(setEventId)
 			if err != nil {
-				fmt.Printf("Error retrieving event %s \n Error: %s", setEventId, err)
+				log.Fatalf("error retrieving event %s error: %s\n", setEventId, err)
 			}
 			fmt.Println(event)
 			return
@@ -34,15 +30,14 @@ var eventsCmd = &cobra.Command{
 		if getAll {
 			allEvents, err := sdk.Client.ListEvents()
 			if err != nil {
-				fmt.Printf("Error retrieving events %s", err)
-				return
+				log.Fatalf("error retrieving events %s", err)
 			}
 
 			fmt.Println(allEvents)
 			return
 		}
 
-		fmt.Print("Please provide an eventId to retrieve: `events --get <eventId>`")
+		log.Fatal("Please provide an eventId to retrieve: `events --get <eventId>`")
 
 	},
 }
